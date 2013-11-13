@@ -1,0 +1,50 @@
+<big>Welcome to the CasparCG Documentation Wiki!</big>
+
+[[Image:CasparCG_Server.jpg]]
+
+
+{| border="0" | cellpadding="30"
+| valign="top" | 
+*'''[[CasparCG Server]]'''
+** [[CasparCG_Server#System_Requirements|System Requirements]]
+** [[CasparCG_Server#System_Recommendations|System Recommendations]]
+** [[CasparCG_Server#SDI_and_HDMI_Cards|SDI and HDMI video cards]]
+** [[CasparCG_Server#Downloads|Downloads]]
+** [[CasparCG_Server#Source_Code|Source Code]]
+** [[CasparCG_Server#Getting_Started|Getting Started]]
+** [[CasparCG_Server#CasparCG_Server_Configuration|Server Configuration]]
+** [[CasparCG_Server#Configuring_Vision_Mixers|Configuring Vision Mixers / Switchers]]
+** [[CasparCG_Server#Producers_(Input_Modules)|Producers (Input Modules)]]
+** [[CasparCG_Server#Mixer_(Transform/Compositing_Module)|Mixer (Transform/Compositing Module)]]
+** [[CasparCG_Server#Consumers_(Output_Modules)|Consumers (Output Modules)]]
+** [[CasparCG_Server#Protocols|Protocols]]
+** [[CasparCG_Server#License|License]]
+** [[CasparCG_Server#Credits|Credits]]
+** [[CasparCG_Server#Change_Log|Change Log]]
+| valign="top" | 
+*'''[[Content and Media]]'''
+** [[Content_and_Media#Video|Video]]
+*** [[Content_and_Media#Video|Video Codecs]]
+** [[Content_and_Media#Flash_Templates|Flash Templates]]
+*** [[Content_and_Media#Flash Templates|Creating Flash Templates]]
+*** [[Content_and_Media#TemplateGenerator| TemplateGenerator]]
+*** [[Content_and_Media#Creating Advanced Flash Templates|Creating Advanced Flash Templates]]
+*** [[Content_and_Media#Creating_Templates_without_using_Flash_Professional|Creating Templates without using Flash Professional]]
+*** [[Content_and_Media#Tutorial: Loading Dynamic Images in a Flash Template|Tutorial: Loading Dynamic Images in a Flash Template]]
+** [[Content_and_Media#Audio|Audio]]
+** [[Content_and_Media#Images|Images]]
+** [[Content_and_Media#Chroma Subsampling|Chroma Subsampling]]
+** [[Content_and_Media# Color Depth| Color Depth]]
+** [[Content_and_Media#Color Levels|Color Levels]]
+** [[Content_and_Media#Color Space|Color Space]]
+** [[Content_and_Media#Interlacing|Interlacing]]
+** [[Content_and_Media#De-interlacing|De-interlacing]]
+** [[Content_and_Media#File Names|File Names]]
+** [[Content_and_Media#Fill Channels|Fill Channels]]
+** [[Content_and_Media# Key / Alpha Channel| Key / Alpha Channel]]
+** [[Content_and_Media#Frame Rates|Frame Rates]]
+** [[Content_and_Media# Pixel Aspect Ratio| Pixel Aspect Ratio]]
+** [[Content_and_Media#Resolutions|Resolutions]]
+|-
+| valign="top" | <categorytree mode=pages>For Developers</categorytree> || 
+|}
