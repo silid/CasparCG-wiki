@@ -1,0 +1,1072 @@
+=Video=
+Pre-rendered video and audio is normally played via the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] directly from the file system.
+
+An alternative is to embed audio and/or video in an FT file and play with the [[CasparCG_Server#Flash Producer|Flash Producer]].
+
+==Video Codecs==
+The [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] can play all the codecs that [http://ffmpeg.org/ FFmpeg] supports.
+
+==Sample Videos==
+The [http://casparcg.com/download/ CasparCG Download page] has links to several packages with sample video files.
+
+
+----
+
+=Flash Templates=
+Dynamic media is played by the CasparCG Server’s [[CasparCG_Server#Flash_Producer|Flash Producer]], so everything that the [http://adobe.com/products/flashplayer/ Adobe FlashPlayer] can handle can be played. This includes Flash animations [[#SWF|SWF]] and Flash video [[#FLV|FLV]] as well as audio, all via the [[#Generate_FT_File|FT]] file (which is just a [[#SWF|SWF]] that has gone through '''[[TemplateGenerator]]'''.)
+
+Since you have full control over everything in Flash, you can dynamically change texts and control individual animations, and all [[#Creating Advanced Flash Templates|ActionScript]] execution works (unlike when you import [[#SWF|SWF]]:s into other tools such as [http://adobe.com/products/aftereffects/ Adobe After Effects].)
+
+Many existing [[#SWF|SWF]]:s are built on the assumption that they will be stored on a web server and embedded in a web page. If the [[#SWF|SWF]] requires any sort of interaction such as mouse clicks, it won’t be very suited for CasparCG playback. However, all features of the Flash Player (such as [[#Creating Advanced Flash Templates|ActionScript]]ed downloading of RSS feeds, for example) is fully functional when played by CasparCG.
+
+An [[#Generate_FT_File|FT]] file is just a Flash ''[[#SWF|SWF]]'' file that has gone through automated checks and been renamed.
+
+To prepare a Flash [[#SWF|SWF]] file for playback by the CasparCG Server, it normally goes through an automated process in the [[#TemplateGenerator|TemplateGenerator]] extension inside [http://adobe.com/products/flash/ Adobe's Flash Professional] authoring application.
+
+
+==Requirements for Creating Flash Templates==
+To create a Flash template for CasparCG you will need the [http://adobe.com/products/flash Flash Professional] authoring environment (CS4 and above recommended) and the [[#TemplateGenerator|TemplateGenerator]] panel. 
+
+==Typical Workflow==
+* Create your design in Adobe Photoshop, Adobe After Effects or some similar software.
+* Import the .psd into Flash
+* Select the text fields you wish to expose to CasparCG and give them instance names (make sure not to begin with the letter "x" since this will make CasparCG ignore this particular instance.)
+* Create your animations
+* Press the generate button in the [[#TemplateGenerator|TemplateGenerator]] panel (make sure that you have entered your name in the panel.)
+
+If everything is correct, the [[#Generate_FT_File|.ft file]] will bee generated and you are ready to test it in CasparCG Server.
+
+==Special Properties of Flash Templates==
+You can create labels in your main time line that can be accessed from CasparCG with the <code>Invoke</code> command. If you create a label named "outro", CasparCG will automatically go to and play this label when a <code>Stop</code> command is received. This is used to create outro animations. The [[#TemplateGenerator]] will look for any <code>stop()</code> command placed after the outro label. If found, the generator will inject a <code>removeTemplate()</code> call on the same keyframe which will remove the template from the TemplateHost. If there is no <code>Stop()</code> command after the outro label, the removeTemplate() call will be injected in the last frame of the layer that contains the outro label. This is important to know, so that you make sure that this layer has its last keyframe on the frame you want the template to be removed.
+
+==Interlacing via the [[CasparCG_Server#Flash_Producer|Flash Producer]]==
+By changing the [[#Frame Rates|frame rate]] in the [[#Flash Document Properties]] inside [http://adobe.com/products/flash/ Adobe's Flash Professional] to ''twice'' the ''normal'' rate, the [[CasparCG_Server#Flash_Producer|Flash Producer]] and a [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] will output interlaced dynamic output. Please see the tables in the [[#Frame Rates]] section for examples and guidelines.
+
+==Best Practices for Flash Templates==
+* Try to avoid several instances with the same instance name since it can be hard to keep track of the project. If you create a timeline animation for a text field; convert the instance to a movie clip before you create the keyframes. 
+* If you need to use [[#Creating Advanced Flash Templates|ActionScript]] in your template (other then basic <code>stop()</code> commands and alike), you should follow the guide lines in [[#Creating Advanced Flash Templates]].
+
+
+==Improving Performance of Flash Templates==
+Flash Player may be a CPU bottleneck when playing high resolution channels. You might notice a major drop in performance between 720p5000 and 1080i5000 channels. One common solution is to let Flash Player run at a lower resolution and then upscale the final render from Flash in Caspar GPU Mixer. To do this, just override the TemplateHost section of your config file. Here you can specify what TemplateHost to load for each resolution. Below is an example of forcing 720p5000 Flash content to be rendered at any 1080i5000 channel. The GPU upscaling is automatically maintained.
+ <template-hosts>
+    <template-host>
+        <video-mode>1080i5000</video-mode>
+        <filename>cg20.fth.720p5000</filename>
+        <width>1280</width>
+        <height>720</720>
+    </template-host>
+ </template-hosts>
+
+You can actually override several template hosts this way within the same config. Below is a complete section for overriding every 1080-format to corresponding 720-TemplateHost.
+ <template-hosts>
+   <template-host>
+       <video-mode>1080i5000</video-mode>
+       <filename>cg20.fth.720p5000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080i5994</video-mode>
+       <filename>cg20.fth.720p5994</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080i6000</video-mode>
+       <filename>cg20.fth.720p6000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p2398</video-mode>
+       <filename>cg20.fth.720p2398</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p2400</video-mode>
+       <filename>cg20.fth.720p2400</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p2500</video-mode>
+       <filename>cg20.fth.720p2500</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p2997</video-mode>
+       <filename>cg20.fth.720p2997</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p3000</video-mode>
+       <filename>cg20.fth.720p3000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p5000</video-mode>
+       <filename>cg20.fth.720p5000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080p6000</video-mode>
+       <filename>cg20.fth.720p6000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+   <template-host>
+       <video-mode>1080i6000</video-mode>
+       <filename>cg20.fth.720p6000</filename>
+       <width>1280</width>
+       <height>720</720>
+   </template-host>
+ </template-hosts>
+
+==Generate FT File==
+To create the [[#Generate_FT_File|.ft file]] file, you use the [[#TemplateGenerator]].
+
+==3D in Flash==
+Using [http://adobe.com/products/flashplayer/ Adobe Flash Player 10] and later, you can use Flash's built-in cameras and 2.5D abilities in your Flash templates.
+
+There are also 3rd party Flash 3D engines such as [http://papervision3d.org/ Papervision3D] that can be used.
+
+==FLV==
+You can use [http://www.adobe.com/devnet/flv/ FLV] videos in [[:Category:Flash Templates|Flash Templates]] and by using the alpha channel in the FLV  you can have transparent pre-rendered video controlled by Flash.
+
+===FLV Pixel Aspect Ratio===
+Flash content played by [[CasparCG_Server#Flash Producer]] is scaled on-the-fly at render time (matched to the [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] when the [[CasparCG_Server#Flash_Producer|Flash Producer]] is instanced,) so an [[#Generate_FT_File|FT]] Flash template can have either a '''square pixel aspect ratio''' or a '''non-square pixel aspect ratio''' used in common broadcast resolutions for SD output.
+
+If you are outputting to SDI via the [[CasparCG_Server#Bluefish_Consumer|Bluefish Consumer]], you can choose to set up your [[#Generate_FT_File|FT]]'s [[#Flash Document Properties]] to match:
+* ''either'' the final output resolution (for SD normally a '''non-square pixel aspect ratio''') 
+* ''or''  the '''square pixel aspect ratio equivalent''' and have the [[CasparCG_Server#Flash_Producer|Flash Producer]] scale it.
+
+This choice of Flash's [[#Flash Document Properties]] resolution should be made before choosing how to render the FLV video clips that will be played in the [[#Generate_FT_File|FT]]. We recommend working with a '''square pixel aspect ratio''' size and (if necessary) have that be squished to SD broadcast resolution on playback to SDI.
+
+If you experience performance issues with Flash content, note that the on-the-fly scaling comes at a performance penalty. To avoid scaling at render time you can resize the Flash content (by scaling the [[#Flash Document Properties|document resolution]] and then scaling and re-saving all imported bitmaps, FLVs, vector graphics and such in a program outside Flash, and reimporting it.
+
+While it is convenient to work with ''square pixel aspect ratio'' content, there is currently a special case caused by a bug in [[http://adobe.com/products/flashplayer/ Flash Player]]. It has a rounding calculation error that causes on-the-fly scaled output that is animated horizontally to "jump" at certain intervals, making movements such as ticker texts to appear less smooth.  
+
+Recommendation for PAR:
+Video non-square
+Flash square (with exception)
+
+===Recommended FLV Render Settings===
+To increase the performance you should use lower compression in the FLV since decompression is harder than reading a larger file from disk.
+
+===FLV Limitations===
+Audio embedded in an [[#FLV|FLV]] can currently only be encoded with 44.1 kHz sampling rate, meaning that it will not match the standard broadcast sampling rate of 48 kHz. For short sound effects, this shouldn't cause any real problems, but beware when using longer FLV videos with sound. An alternative solution would be the import the 48 kHz audio file into ''Flash'', and sync it to the silent FLV video on the timeline.
+
+==TemplateGenerator==
+[[Image:Ftgenerator.jpg|The TemplateGenerator extension palette in Flash]]
+
+===What the TemplateGenerator Does===
+The TemplateGenerator executes a script [http://github.com/CasparCG/Tools/blob/master/as3/TemplateGenerator/trunk/build/jsfl/brew2_0.jsfl brew1_8.jsf] that injects code into the current Flash project to make it compatible with CasparCG Server. The project is then compiled and the [[#SWF|SWF]] is renamed to '''.ft''' which is a confirmation that the file is prepared to be played by CasparCG Server.
+
+It will scan the main timeline and the timeline of any MovieClip items in the library and insert the following code at the end of each frame where it finds an element of type 'text' which is dynamic and has an instance name that doesn't begin with 'x'. The code will register the component as a CasparTextField which is a CasparComponent.
+
+From line 735 of [http://github.com/CasparCG/Tools/blob/master/as3/TemplateGenerator/trunk/build/jsfl/brew2_0.jsfl brew1_8.jsf] 
+ thisFrame.actionScript +=  "\n(root as CasparTemplate).registerComponent(new CasparTextField(" + allElements[elementNr].name + ", Number("+ allElements[elementNr].name + ".getTextFormat().letterSpacing)));"
+
+Note that he [http://sourceforge.net/p/casparcg/code/3801/tree/framework/as3/TemplateHost/trunk/src/se/svt/caspar/template/components/CasparTextField.as CasparTextField] class will clear any text that is already set in the textfield when it is constructed. This means if you want to add an instance name to a text field so that you can manage it with ActionScript but don't want to be able to update it from CasparCG Server with [[CasparCG_2.0_AMCP_Protocol#CG_UPDATE|UPDATE]], you should always add the '''x''' at the beginning of the instance name, so that this code is not injected.
+
+===TemplateGenerator Installation===
+The TemplateGenerator is distributed as an Adobe Flash extension (.mxp). You will need the [http://www.adobe.com/exchange/em_download/ Adobe Extension Manager] to be able to install the extension. To install the TemplateGenerator just double click on the TemplateGenerator.mxp file and it should open the Extension Manager automatically. When you have installed the package it should show up as "TemplateGenerator" in the Extension Manager. You will need to restart flash (if it is open) before you can start to generate flash templates. The TemplateGenerator panel can be found at Window -> Other Panels. 
+
+The extension will also automatically install the class library that is needed to generate flash templates. The first time a flash template is generated the TemplateGenerator will automatically add the class path to this class library. If you are creating advanced flash templates and uses an external code editor you might need to set this class path manually. The library is installed at ''$(LocalData)/Classes/Caspar''. The $(LocalData) can be found at:
+
+* Windows: ''Hard Disk\Documents and Settings\user\Local Settings\Application Data\Adobe\Adobe Flash CS4\language\Configuration\''
+* Macintosh: ''Hard Disk/Users/user/Library/Application Support/Adobe/Adobe Flash CS4/language/Configuration/''
+
+Finally, the extension will install some project templates with some of the common formats used in broadcast. You can use these when you create a template from scratch by choosing ''File->New->Templates->Caspar''
+
+===TemplateGenerator Installation on Mixed-language Systems===
+If you installed either the OS or Flash Professional in a non-US language, the TemplateGenerator may install properly but you won't be able to see it in Flash Professional. 
+Please see [http://www.casparcg.com/forum/viewtopic.php?f=5&t=297&p=813#p810 this forum thread for a solution].
+<!--
+unless you copy the files in the subfolder:
+* Windows: ''Hard Disk\Documents and Settings\user\Local Settings\Application Data\Adobe\Adobe Flash CS4\'''YOUR_LANGUAGE_FOLDER'''''''
+* Macintosh: ''Hard Disk/Users/user/Library/Application Support/Adobe/Adobe Flash CS4/'''YOUR_LANGUAGE_FOLDER'''''''
+...to the 
+
+I googled around for a bit and he problem was that the Extension files was located under /Users/[YOUR USERNAME]/Library/Application Support/Adobe/Flash CS5/sv_SE instead of en_US. And since I'm using a english version of Flash and a Swedish OS, it didn't find the files.
+
+So, I copied over the files in the sv_SE folder to the corresponding folders in en_US, and now I also got a TemplateGenerator panel!
+
+This seems to be a problem that can occur on other versions of Flash as well.
+
+If you have the same problem under Windows, the folder for the files is C:\Documents and Settings\[YOUR USERNAME]\Local Settings\Application Data\Adobe\Flash CS5\
+
+
+-->
+
+====The Process====
+All modifications to the Flash project file is reverted when the generation is finished. This is what happens to a Flash project during the process:
+
+* All dynamic text fields in the project (any timeline) are exposed (converted to <code>CasparTextField</code>) so that they can be accessed from CasparCG. The font is automatically embedded. If there is a dynamic text field that has no instance name the script will throw an error. If the instance name begins with the letter "x" the field will not be exposed to CasparCG and it will be treated as a normal text field.
+* All CasparCG Flash components are exposed so that they can be accessed from CasparCG.
+* The document class is set to <code>se.svt.caspar.template.CasparTemplate</code> unless you have entered your own. In that case; be sure to use the <code>CasparTemplate</code> as the super class. Have a look at [[#Creating Advanced Flash Templates]] for more info.
+* A description of the template will be generated from the content in the document and the info in the panel.
+* Depending on your choices in the panel, certain objects will be optimized for CasparCG. (read more about this further down).
+
+=====The Panel===== 
+There are some settings in the panel you should know about:
+
+======Generate FT File======
+When you press this button the process will begin with the settings provided in the panel.
+
+======Author======
+Here you enter your name (required) and your e-mail (optional) for easy backtracking. This information will be stored in the template description.
+
+======Template info======
+Here you can enter information, e.g. a short description of the template, that will be stored in the template description. This is optional.
+
+=======Optimization=======
+These are automatic optimization of different objects that uses the best settings for rendering on CasparCG.
+
+'''Optimize images'''
+If this option is checked (default) all images in the project will have their compression set to "lossless" and the property "allow smoothing" will be set to true.
+
+'''Optimize text fields'''
+If this option is checked (default) all text fields will be rendered on even pixels.
+
+'''Optimize embedded videos'''
+If this option is checked (default) all embedded videos will have the properties smoothing set to true and deblocking set to 4.
+
+======Text Anti-aliasing======
+The global thickness and sharpness for all the text fields in the document.
+
+======Limitations======
+* If some unexpected error occurs when the script is executed there may be a possibility that the execution is halted before the project is reverted (since there is no try catch in jsfl). If you have a project where the generation does not work, check in the timeline(s) for injected code that may interfere with the process. 
+
+*Avoid working with scenes in flash since this is untested.
+
+======To do======
+Create a cache file for the template info.
+
+======Notes======
+This extension used to be called the '''Brewer''', '''CasparTools''' and '''FT Generator''' in previous versions.
+
+
+----
+
+==SWF==
+The CasparCG Server's [[CasparCG_Server#Flash_Producer|Flash Producer]] supports and plays all types of '''[[#SWF|SWF]]''' files, since it uses [http://adobe.com/products/flashplayer/ Adobe's FlashPlayer] for rendering. That includes all types of [[#Creating Advanced Flash Templates|ActionScript]] methods and commands.
+
+Many existing [[#SWF|SWF]]'s are built on the assumption that they will be stored on a web server and embedded in a web page. If the [[#SWF|SWF]] requires any sort of interaction such as mouse clicks, it won’t be very suited for CasparCG playback. However, all features of the Flash Player (such as [[#ActionScript]]ed downloading of RSS feeds, for example) is fully functional when played by CasparCG.
+
+To prepare a [[#SWF|SWF]] file for playback by the CasparCG Server, it normally goes through an automated process in the [[#TemplateGenerator|TemplateGenerator]] extension inside [http://adobe.com/products/flash/ Adobe's Flash Professional] authoring application, generating an [[#Generate_FT_File|FT]] file (which is just an ''[[#SWF|SWF]]'' file that has gone through [[#TemplateGenerator|TemplateGenerator]] and been renamed.)
+
+
+----
+
+==Tutorial: Loading Dynamic Images in a Flash Template==
+Getting a Flash template to load and dynamically display bitmaps from disk is very useful for lots of applications. Here's a quick explanation on how to display different flags in a volleyball scoreboard.
+
+[http://casparcg.com/wp-content/uploads/tutorials/Tutorial_Loading_Dynamic_Images_in_Flash_Templates.zip Download the source files used for this tutorial].
+
+[[Image:TeamStatistics.jpg|686px|Preview of the Flash template with dynamically loaded flags]]
+
+
+Open the ''Team_Statistics.fla'' file in Flash Professional, and you can see that the dynamic text fields are just normal dynamic text with an instance name. The flags are UILoader components:
+
+[[Image:Flash_Layout.png|686px|The Flash template project]]
+
+
+Open the ''Component window'' (Ctrl+F7) and create two '''UILoader'''s and place and size them correctly. Remember to give them individual and unique instance names. In the example project they are called '''Image1''' and '''Image2''', respectively. 
+
+Then create a new ActionScript file and let it extend ''CasparTemplate'' and let the animation point to the class like this:
+
+[[Image:Class.png|Extend the CasparTemplate]]
+
+
+Please refer to [[Content_and_Media#Creating_Advanced_Flash_Templates|Creating Advanced Flash Templates]] for further details about extending ''CasparTemplate''. 
+
+In the ActionScript file ''TeamStatistics.as'' (place it in the folder as the .fla file) you have to have at least the following code (the text is available in [http://casparcg.com/wp-content/uploads/tutorials/Tutorial_Loading_Dynamic_Images_in_Flash_Templates.zip the source files].)
+
+[[Image:Script.png|ActionScript file]]
+
+
+Important in the above code is line 20 and 24 respectively, where the green texts are the variable names of the images. Use these variable names to send the image filenames to the template. In line 22 and 26 respectively, the '''UILoader''' components get their source property set to the name of the file. All the other dynamic text fields get their data to the call on line 29.
+
+Finally, you have to send the template variables formatted as a correct URL. 
+The file path
+ D:\Beach_Volley\World_Flags_2013\World_Flags_BIG_40px\Switzerland.png
+...should be entered as:
+ file:///D:/Beach_Volley/World_Flags_2013/World_Flags_BIG_40px/Switzerland.png
+
+
+
+----
+
+==Creating Advanced Flash Templates==
+
+To create an advanced Flash template for CasparCG you will need the [http://www.adobe.com/products/flash/ Flash Professional] authoring environment (CS4 and above recommended) and the [[#TemplateGenerator|TemplateGenerator]] panel. 
+
+For more information on how Flash templates are hosted inside CasparCG Server, please see the [[CasparCG_Server#TemplateHost|TemplateHost]] section.
+
+===The Document Class===
+The document class must extend the <code>se.svt.caspar.template.CasparTemplate</code> class (or another class that extends it). The <code>CasparTemplate</code> class contains methods and properties used by CasparCG and you can override some of the default implementation.
+
+===Public Methods===
+
+===CasparTemplate()====
+Creates a new CasparCG template.
+
+====Play():void====
+This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>PLAY</code> command is sent from CasparCG. By default it will try to play the main time line in the Flash file (if there is no <code>stop()</code> on the first frame). The template will not be visible until the <code>Play</code> command is sent from CasparCG. To override this method do the following:
+
+ <code> override public function Play():void
+ {
+    //Your code here
+ }</code>
+
+====Stop():void====
+This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>Stop</code> command is sent from CasparCG. By default it will look in the main time line if there is a label named "outro". If not it will call the <code>removeTemplate</code> method that marks the template for removal. If it finds an outro label it will goto and play that label and when the outro is ready the <code>removeTemplate</code> will be called. When you override this method it is very important that you either call <code>super.Stop()</code> or <code>removeTemplate()</code> when you are finished. 
+
+To override this method do the following:
+
+''example 1:''
+ 
+ override public function Stop():void 
+ {
+    //Your code here
+    //THEN
+    super.Stop();
+    //OR
+    removeTemplate();
+ }
+
+ 
+''example 2:''
+
+ override public function Stop():void 
+ {
+    myOutroFunction();   
+ }
+ 
+ private function myOutroFunction():void
+ {
+    try
+    {
+       //Do some codebased animation…
+       myAnimationEngine.doMyOutroAnimation();
+       myAnimationEngine.onComplete(myCompleteFunction);
+    }
+    catch(e:Error)
+    {
+       myCompleteFunction();
+    }
+ }
+ 
+ private function myCompleteFunction():void
+ {
+    super.Stop();
+    //OR
+    removeTemplate();
+ }
+
+====Next():void====
+This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>Next</code> command is sent from CasparCG. It is used to step forward in the template. By default this method will make the template continue from the current frame. The command will be ignored if the current frame label is "outro", then <code>Stop()</code> must be called. To override this method do the following:
+
+ override public function Next():void 
+ {
+   //Your code here
+ }
+
+====SetData(xmlData:XML):void====
+This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>SetData</code> command is sent from CasparCG. <code>SetData</code> is used to set data to the components or parameters that are exposed in the [[#Generate_FT_File|FT]] file. The data is buffered by the <code>ComponentDataBuffer</code> which makes it possible to set data to a component that is not yet instantiated. When the component later is instantiated it calls <code>registerComponent</code> (this is automatically done for all CasparCG components on the stage) which then checks if there are any buffered data for the component and it that case it sends the data to it. 
+
+The XML format that is sent from CasparCG looks like this:
+<code>
+ <templateData>
+   <componentData id="instance1">
+     <data id="text" value="Text displayed in a CasparTextField" />
+   </componentData>
+   <componentData id="instance2">
+     <data id="imagePath" value="d:/caspar/_TEMPLATEMEDIA/myImage.png" />
+     <data id="alpha" value="0.6" />
+   </componentData>
+   <componentData id="customParameter1">
+     <data id="data" value="true" />
+   </componentData>
+ </templateData></code>
+
+"instance 1" is a regular <code>CasparTextField</code> and it takes one parameter called "text" and sets the value in the attribute "value" to the text parameter in the CasparTextField. "instance2" demonstrates a possible CasparCG component that takes an image path and and an alpha value. "customParameter1" is a custom parameter defined in the document class and it will receive the value "true".
+
+Some of the reasons to override <code>SetData</code>:
+
+* You want to do stuff before data is set to the components
+* You want to know when a specific component is populated with data
+* You have code based custom parameters (read more about this in "Custom paramers")
+
+Here are some examples of overriding <code>SetData</code>:
+
+''example 1''
+ //This override checks if instance1 is getting data
+ public override function SetData(xmlData:XML):void 
+ {    
+    //loop trough the xml 
+    for each (var element:XML in xmlData.children())
+    {   
+       //check if the componentData atrribute "id" is "instance1"
+       if (element.@id == "instance1")    
+       {
+          //if found and not a empty string…
+          if (element.data.@value != "")
+          { 
+             //...call a function "setCurrentState" that accepts two parameters: the current state and the text received.               
+             setCurrentState("Text received", element.data.@value);       
+             break;
+          }
+       }    
+    }
+    //pass on the xmlData to the default implementation which will send it to the ComponentDataBuffer.
+    super.SetData(xmlData);   
+ }
+
+ 
+''example 2''
+ //This override check for data to the custom parameter "customParameter1"
+ public override function SetData(xmlData:XML):void 
+ {    
+    //loop trough the xml 
+    for each (var element:XML in xmlData.children())
+    {   
+       //check if the componentData atrribute "id" is "customParameter1"
+       if (element.@id == "customParameter1")     
+       {
+          //if found, check if true or false
+          if (element.data.@value == "true")
+             {  
+             //call a function "myFunction" and pass "true".
+             myFunction(true);
+          }
+          else if(element.data.@value == "false")
+          {
+             //call a function "myFunction" and pass "false".
+             myFunction(false);
+          } 
+          break;
+       }    
+    }
+    //pass on the xmlData to the default implementation which will send it to the ComponentDataBuffer.
+    super.SetData(xmlData);   
+ }
+
+====GotoLabel(label:String):void====
+[final] This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>Invoke</code> command is sent from CasparCG. It will first try this method, if it generates an error the [[CasparCG_Server#TemplateHost|TemplateHost]] will try <code>ExecuteMethod</code> instead. <code>GotoLabel</code> takes one parameter, a label, and it will try to go to and play that label on the main timeline. If there is no label with that name it will throw an error.
+
+====ExecuteMethod(methodName:String):void====
+[final] This method will be called from the [[CasparCG_Server#TemplateHost|TemplateHost]] when a <code>Invoke</code> command is sent from CasparCG and the <code>GotoLabel</code> command generated an error. It will try to execute a method on the template with the name specified in "methodName". If there is no method with that name it will throw an error. To expose a method that can be executed via <code>Invoke/ExecuteMethod</code> you simply create a public function in the document class. The method does not take any parameters. If you need to receive specific parameters you should use "Custom Parameters" that is described further down.  
+
+====GetDescription():String====
+[final] This method can be called by CasparCG and returns an XML description of the template. The description is automatically generated by the [[#TemplateGenerator|TemplateGenerator]].
+
+====initialize(context:ITemplateContext):void====
+[final] This method is called when a template is instantiated and provides the template with an instance of the <code>CommunicationManager</code> and what layer the template is loaded on to.
+
+====postInitialize():void====
+This method is called by initialize right after initialization is complete. Override this method to be able to access the <code>CommunicationManager</code> and/or the layer.
+
+''example 1''
+ override public function postInitialize():void {
+ {
+    communicationManager.sharedData.addSubscriber(this, "testData"));
+ }
+
+====registerComponent(instance:ICasparComponent):void====
+[final] This method is called by a component when initialized. It will tell the <code>ComponentDataBuffer</code> that the instance is ready to receive data.
+
+====dispose():void====
+[final] This method is called by the [[CasparCG_Server#TemplateHost|TemplateHost]] before the template is removed. It will dispose all the loaded components.
+
+====preDispose():void====
+This method is called by dispose just before the components are disposed. Override this method to be able to clean up everything you need before the template is removed.
+
+''example 1''
+ override public function preDispose():void 
+ {
+    removeAllMyListeners();
+    stopAllTimers();
+    disposeAllMyObjects();
+    makeFinalNotifications();
+ }
+
+===public properties===
+
+====movieClip:MovieClip====
+[final][read-only] A reference to the template as a <code>MovieClip</code>. Used by the [[CasparCG_Server#TemplateHost|TemplateHost]].
+
+====originalWidth:Number====
+[final] The original width of the template. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]].
+
+====originalHeight:Number====
+[final] The original height of the template. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]].
+
+====originalFrameRate:Number====
+[final] The original frame rate of the template. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]].
+
+====stopOnFirstFrame:Boolean====
+[final] A property that is true if there is a <code>stop()</code> on the first frame on the main timeline. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]]. 
+
+====communicationManager:ICommunicationManager====
+[final][read-only] This is a reference to the communication manager and it is accessible in the <code>postInitialize</code> method.
+
+====description:XML====
+[final] This is a reference to the description XML that describes the template. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]]. 
+
+====version:String====
+[final][read-only] The version of the template. This is set by [[#TemplateGenerator|TemplateGenerator]] and should normally ''not'' be set manually. This property is used by the [[CasparCG_Server#TemplateHost|TemplateHost]]. 
+
+====layer:int====
+[final][read-only] The layer that the template is playing on. This is set by the [[CasparCG_Server#TemplateHost|TemplateHost]] and it is accessible in the <code>postInitialize</code> method.
+
+===Custom Parameters===
+If you need to use custom parameters you can expose them by adding the following constant in your document class:
+
+ private const customParameterDescription:XML =   
+ <parameters>
+    <parameter id="customParameter1" type="boolean" info="Description of the first parameter" />
+    <parameter id="customParameter2" type="number" info="Description of the second parameter" />
+ </parameters>;
+
+You will have to use the exact syntax described above for the [[#TemplateGenerator|TemplateGenerator]] to recognize it. The parameters will be included in the template description and can then be externally accessed. 
+The parameter types should be set to either boolean, number, string or xml.
+
+''example 1''
+
+ private const customParameterDescription:XML =   
+ <parameters>
+    <parameter id="resultData" type="xml" info="The data that is used to fill the result table" />
+ </parameters>;
+ .
+ .
+ .
+ override public function SetData(xmlData:XML):void 
+ {      
+    for each (var element:XML in xmlData.children())
+    {
+       if (element.@id == "resultData")     
+       {
+          populateResultTable(element.data);    
+       }    
+    }
+    super.SetData(xmlData);   
+ }
+
+===Creating A Custom Caspar Component===
+You can pass custom XML to your template. But it's suggested sticking to the form of componentData and then putting your custom xml inside the <componentData> tags because then in the flash template you can still use the default setData implementation and still have the option to make custom caspar component's, which would then receive your custom xml. Instead of putting everything on the stage put it in a movieclip instead which would then implement ICasparComponent (or you could do everything from actionscript).
+
+Here is the interface you need to implement: [http://sourceforge.net/p/casparcg/code/3801/tree/framework/as3/TemplateHost/trunk/src/se/svt/caspar/template/components/ICasparComponent.as]
+
+Simply put the content inside a class which extends Sprite or MovieClip and implements ICasparComponent. Then it needs to implement a SetData function which will receive the custom xml inside the componentData tag which has an id matching the component id, a destroy function which cancels any timers etc so that everything can be garbage collected, and a "get name()" function which should return the string which should be the id that you use to send data to it in the <componentData id=?> tag.
+
+Then in the document class you just need to do something like:
+
+ var component:ICasparComponent = new ComponentClassName();
+ addChild(component);
+ registerComponent(component);
+
+
+The registerComponent function is part of the CasparTemplate class and is what enables the relevant template data to be sent to the relevant caspar component.
+
+The advantages of doing it this way are that the ComponentDataBuffer will still be used, and that it is easier to add more components to the same template later on if you wanted, or transfer components between different projects.
+
+The component data buffer holds back any xml that it has received with an id that hasn't been registered with registerComponent() and then sends it after registerComponent() has been called. So it means if a component isn't loaded until after a few frames and data has already been sent to it, its SetData function will receive it immediately after registerComponent() has been called and it won't get lost.
+
+===Communication Manager===
+More information soon...
+
+===Best Practices===
+* Before you deliver a .ft file you should omit all you traces.
+* If you have custom parameters you should define them as described above.
+* Remove any instances that are not used.
+
+===Generate FT File===
+To create the [[#Generate_FT_File|.ft file]] you use the [[#TemplateGenerator|TemplateGenerator]].
+
+
+
+----
+==Creating Templates without using Flash Professional==
+
+One of the great things with CasparCG is that it is free, with the exception that you are forced to use Adobe Flash Professional to create your templates, until now! Well, actually, this have always been possible to do but has not been very clear.
+
+'''WHAT YOU'LL NEED'''
+
+1. You will need [http://www.flashdevelop.org/ Flash Develop] since this example is created in this wonderful free editor. The project is compiled with the Flex compiler which is installed together with the program. Just press Ctrl + Enter as usual.
+
+2. Basic coding skills in AS3. The code is pretty well commented but you will need to know some of the basics.
+
+'''WHAT YOU'LL GET'''
+
+1. A pretty ugly template that you can play with.
+
+2. Hopefully a better understanding of how to create templates without using the CasparCG TemplateGenerator.
+
+3. An example on how to use the inbuilt component flow to create custom components so you don't need to override SetData and doing all the xml-parsing in the document class.
+
+SOME NOTES
+As you might notice the output file is suffixed with '''.ft'''. This is not the act of magic as with the CasparCG [[TemplateGenerator]], it is merely a setting in the properties for the project. I have just changed the "[[#SWF|SWF]]" to "ft".
+
+I hope this will make CasparCG even more accessible than before! Of course you can use any editor/IDE with this method, it's just that I prefer Flash Develop.
+
+[http://sourceforge.net/projects/casparcg/files/Flash_Templates/TemplateWithoutFlashPro.zip/download Download example file for Flash Develop]
+
+----
+
+=The HTML Producer=
+Since CasparCG Server 2.0 there is an HTML producer. The HTML producer is a modern alternative to flash templates and it allows CasparCG to display any html page.
+----
+
+
+==How it works==
+The HTML producer can either load html pages from a url but it can also treat HTML files just like it treats Flash templates. Because there is no template generator for HTML files you will have to program any interaction between CasparCG Server and your template via JavaScript.
+
+
+==Working with JavaScript==
+CasparCG server will communicate with your template via the following javascript functions.
+
+===play()===
+This function will be called by CasparCG to instruct the template to start playing.
+
+===stop()===
+This function will be called by CasparCG to instruct the template it should stop playing. In the flash producer the template will be removed after this is called but in the html producer there is no such feature.
+
+===update(templatedata)===
+This function will be called by CasparCG to send any templatedata as a string to the template. The templatedata is formatted the same way as in flash.
+
+===next()===
+This function can be used by CasparCG to control animations that have multiple discreet steps.
+
+
+==The advantages==
+A forum topic about flash vs. html can be found [http://casparcg.com/forum/viewtopic.php?f=5&t=4015 here]. If you want to contribute to the discussion, please keep it civil!
+
+Some advantages are:
+
+1. The big community of web developers make it easy to receive help and find information
+
+2. HTML templates can depend on many open source libraries such as those found on npm
+
+3. HTML is very future proof and will be supported for a long time to come
+
+4. If you come from a web development background you will be up and running with CasparCG in no time!
+
+
+==The caveats==
+1. The current HTML implementation in CasparCG 2.0.7 is quite old and misses support for CSS 3d transformations
+
+2. No support for font sharpening, although SVG fonts can be a solution.
+
+3. If you use dependencies, templates will span multiple files. This can be bothersome when developing for commercial parties.
+
+4. MP3 and MP4 formates are not supported.
+
+----
+
+=Images=
+CasparCG Server 2.0 can play out all the RGB and RGBA image formats that the [http://freeimage.sourceforge.net/features.html FreeImage] component can play.
+
+Make sure that you convert CMYK images to RGB before trying to play them with CasparCG Server.
+
+With CasparCG Server's [[CasparCG_Server#Image_Scroll|Image Scroll]] you can automatically animate bitmaps with horizontal or vertical scrolling.
+----
+
+=Audio=
+==Sampling Rate==
+* CasparCG Server 2.0.3 and earlier works with 32-bit, 2-channel stereo sound.
+* Embedded SDI audio via BlackMagic Design's cards is 32-bit, 2-channel stereo sound.
+* Embedded SDI audio via Bluefish cards is 16-bit, 2-channel stereo sound.
+* System audio (via the computer's sound card) is 16-bit, 2-channel stereo sound.
+
+The preferred sampling rate of audio is 48 kHz which conforms with broadcast standards, however other sampling rates, such as 44.1 kHz (CD Audio) also work.
+
+'''Audio inputs that are not 48 kHz, 32-bit stereo are automatically transcoded in real-time.'''
+
+==Audio Producers==
+The FFmpeg producer and the DeckLink producer can both handle audio.
+
+The FFmpeg producer tries to determine the channel layout of the source file, but sometimes cannot do so correctly. Therefore the possibility to specify the channel layout of a file exists. It can be done like this:
+
+ PLAY 1-0 surround_file CHANNEL_LAYOUT SMPTE
+...or by using a custom on-the-fly generated channel layout:
+ PLAY 1-0 surround_file CHANNEL_LAYOUT "5.1:Ls Rs L R C LFE"
+
+The DeckLink producer by default assumes "stereo" as the channel layout, but can be told to use another layout:
+ PLAY 1-0 DECKLINK DEVICE 2 FORMAT 720p5000 CHANNEL_LAYOUT SMPTE
+...or a custom layout with the same syntax as expected by the FFmpeg producer:
+ PLAY 1-0 DECKLINK DEVICE 2 FORMAT 720p5000 CHANNEL_LAYOUT "5.1:Ls Rs L R C LFE"
+
+==Audio Consumers==
+All consumers receive audio data in the channel layout used by the audio mixer, but can convert it to another layout. Here is how the relevant (those consuming audio in any way) consumers handles incoming audio:
+* '''system-audio''' Always converts to stereo
+* '''decklink''' Defaults to stereo but can be told to use another via the <channel-layout> element in ''casparcg.config'' or the CHANNEL_LAYOUT parameter. Note that the actual output on the SDI cable will always be 2 channels, 8 channels or 16 channels. So for example a 5.1 channel layout will cause 8 channels to be sent but with the two last channels silent. In the case of mono, channel 1 will be duplicated to channel 2.
+* '''bluefish''' Defaults to stereo but can be told to use another via the <channel-layout> element in casparcg.config or the CHANNEL_LAYOUT parameter.
+* '''ffmpeg''' Always uses the same audio layout as the audio mixer. Note that the default audio codec for a given container type might not support the encoding of more than 2 channels, in which case the FFmpeg consumer will fail to initialize. A custom '''-acodec''' must be given in those cases which supports the number of channels used by the video channel.
+
+==Audio Channels==
+2-channel stereo is supported in CasparCG Server 2.0.3 and earlier.
+
+Mono and up to 16 channel audio input and output is supported from CasparCG Server version 2.0.4.
+
+===Audio Channel Layouts===
+The audio pipeline works with a concept called channel layouts. It is a mapping between a numbered audio channel and the corresponding speaker it is supposed to be directed to. The following are the predefined layouts in CasparCG Server 2.0.4 and later:
+
+ ============================================================
+ Name         Type          Layout
+ ------------ ------------- ---------------------------------
+ mono         1.0           C
+ stereo       2.0           L R
+ dts          5.1           C L R Ls Rs LFE
+ dolbye       5.1+stereomix L R C LFE Ls Rs Lmix Rmix
+ dolbydigital 5.1           L C R Ls Rs LFE
+ smpte        5.1           L R C LFE Ls Rs
+ passthru     16ch          (will just pass everything as is)
+ ============================================================
+
+The channel layout type like for example "5.1" is a string selected by convention to describe what set of channels to expect in the layout. This means that for example dts and smpte are directly translatable, just by rearranging the order of the channels.
+
+The channel layout concept is used in the following areas:
+* The frames produced by a producer has a channel layout.
+* The audio mixer mixes in a specific channel layout. The mixer automatically converts incoming audio to the correct channel layout if necessary before mixing.
+* A consumer might convert the frames delivered from the audio mixer to any other channel layout before outputting the audio.
+A channel layout can be redefined or added by adding an element in casparcg.config in the configuration/audio/channel-layouts element. The element name is used as the layout name:
+
+  <channel-layouts>
+    <quad>
+      <type>4.0</type>
+      <num-channels>4</num-channels>
+      <channels>L R Ls Rs</channels>
+    </quad>
+  </channel-layouts>
+
+===Rearranging and up/down mixing===
+If a file played by the FFmpeg producer has the channel layout "dolbydigital" and the audio_mixer channel layout is "smpte", the audio mixer will recognise that no upmixing or downmixing is required to adapt the incoming data on the FFmpeg layer (both "dolbydigital" and "smpte" share the same layout type "5.1"), so it just rearranges the channel order:
+  0 => 0 (L)
+  1 => 2 (C)
+  2 => 1 (R)
+  3 => 4 (Ls)
+  4 => 5 (Rs)
+  5 => 3 (LFE)
+
+If on the other hand the layouts are of different types, a so called mix config will be used in order to determine how to convert the audio channels.
+
+
+===Audio Mix Configs===
+A '''mix config''' specifies how to convert audio of a channel layout type (for example "5.1") to another layout type (for example "2.0"). The default mix config for "5.1 => 2.0" looks like this (configurable in casparcg.config):
+
+  <mix-configs>
+    <mix-config>
+      <from>5.1</from>
+      <to>2.0</to>
+      <mix>average</mix>
+      <mappings>
+        <mapping>L  L 1.0</mapping>
+        <mapping>R  R 1.0</mapping>
+        <mapping>C  L 0.707</mapping>
+        <mapping>C  R 0.707</mapping>
+        <mapping>Ls L 0.707</mapping>
+        <mapping>Rs R 0.707</mapping>
+      </mappings>
+    </mix-config>
+  </mix-configs>
+
+The mix-element determines what strategy should be used when multiple source channels are mixed into a single destination channel. Two strategies are available:
+
+* add -- Adds the samples together (can cause clipping).
+* average -- Uses the average of all source samples (can cause too low volume).[/list]
+Each mapping defines the source channel and the destination channel as well as the "influence" the source channel should have on the destination channel. Lowering the "influence" can be useful to help avoiding clipping when the "add" strategy is used.
+
+
+
+
+==Audio Output==
+With the [[CasparCG_Server#DeckLink_Consumer|DeckLink Consumer]] you can decide if you want audio output via HDMI, SDI or the audio jacks of the card(s).
+
+With the [[CasparCG_Server#Screen_Consumer|Screen Consumer]], audio is played via the regular audio output of the machine.
+
+With the [[CasparCG_Server#Bluefish_Consumer|Bluefish Consumer]], audio is either played via the regular audio output of the machine, or embedded in the SDI stream.
+
+==Audio Limitations==
+Audio embedded in an [[#FLV|FLV]] can currently only be encoded with 44.1 kHz sampling rate, meaning that it will not match the standard broadcast sampling rate of 48 kHz. For short sound effects, this shouldn't cause any real problems, but beware when using longer FLV videos with sound. An alternative solution would be the import the 48 kHz audio file into ''Flash'' as a separate audio file, and sync it to the silent video on the same timeline.
+
+The biggest drawback of using audio inside a Flash template is that it can only be played through the system audio output, which means it will not be embedded in SDI/HDMI output, and it will not be in perfect sync. If you need a Flash template to play audio and/or video, we recommend you use the '''CasparCG AS3 Server Connection''' library (available from the Download page) to have the Flash template send the appropriate AMCP commands to load and play audio (and/or video) through the FFmpeg producer.
+
+
+
+----
+
+=Frame Rate and Resolution=
+The frame rate and resolution used for a channel is primarily set in the [[CasparCG_Server#Channels|CasparCG Server configuration]], but it must also match the content your are playing. The frame rate and resolution of content is changed:
+* In the [[CasparCG_Server#Bluefish_Feature_App|Bluefish Feature App]] if you are using the [[CasparCG_Server#Bluefish_Consumer|Bluefish Consumer]] for [[CasparCG_Server#Consumers_.28Output_Modules.29|SDI output]].
+* In the DeckLink control panel if you are using the [[CasparCG_Server#DeckLink_Consumer|DeckLink Consumer]] for [[CasparCG_Server#Consumers_.28Output_Modules.29|SDI output]].
+* In the pre-rendered video file if played by the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]].
+* In the Flash Professional's '''Document Properties''' if you are making an [[#Generate_FT_File|FT]] for playback via the [[CasparCG_Server#Flash_Producer|Flash Producer]].
+
+
+The maximum frame rate that a CasparCG system is capable of depends on many factors such as resolution, frame rate, bit rate, [[#Video Codecs|codec]] and which [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] and [[CasparCG_Server#Consumers_.28Output_Modules.29|consumers]] you use, plus the performance of your [[CasparCG_Server#Supported_Hardware|hardware]].
+
+
+==Real-time Scaling via the [[CasparCG_Server#Flash_Producer|Flash Producer]]==
+Flash templates are automatically scaled to the resolution determined by the [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] used. That means you can work in square-pixel documents in Flash and they are scaled properly to fit the [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]]. This also means that as long as you are only using vector graphics and text, you can reuse SD templates in HD outputs.
+
+If you don't have 1 to 1 ratio between your video resolution and the template resolution, Flash will scale it, '''which costs a lot of performance'''. Instead you can use the [[CasparCG_Server#Mixer Module|Mixer Module]] to scale it for you on the GPU. Add the following lines to your config. Don't forget to replace FORMAT and RESOLUTION:
+ <template-hosts>
+   <template-host>
+            <video-mode>1080i5000</video-mode>
+            <filename>cg20.fth.'''FORMAT'''</filename>
+            <width>'''RESOLUTION'''</width>
+            <height>'''RESOLUTION'''</height>
+        </template-host>
+ </template-hosts>
+
+'''FORMAT''' = One of the [[CasparCG_Server#Channels_Configuration|CasparCG Server's supported resolution and frame rates]].
+
+'''RESOLUTION''' = Your template's resolution.
+
+==Flash Content Output to SDI or HDMI==
+For [[#Generate_FT_File|Flash content]] played by the [[CasparCG_Server#Flash_Producer|Flash Producer]] and output to an [[CasparCG_Server#Consumers_.28Output_Modules.29|SDI or HDMI consumer]] that is capable of [[#Interlacing|interlaced]] output:
+{| border="1" cellspacing="3"
+|- valign="TOP"
+|'''Expected Playback Frame Rate and Mode:'''
+|'''Set the Flash Document Properties Frame Rate:'''
+|'''Render [[#FLV|FLV]]s as:'''
+|- valign="TOP"
+| '''23.976p''' 
+| 23.976 fps
+| 23.976 progressive fps
+|- valign="TOP"
+| '''24p''' (film / movie /cinema for progressive playback)
+| 24 fps
+| 24 progressive fps
+|- valign="TOP"
+| '''25p''' (progressive PAL SD ''576p25''<!--, HD ''720p25''--> and HD ''1080p25'')
+| 25 fps
+| 25 progressive fps
+|- valign="TOP"
+| '''29.976p''' (progressive NTSC SD ''480p29.976'', HD ''720p29.976'' and HD ''1080p29.976'')
+<small>(sometimes mistakenly called ''480p30'', ''720p30'' and ''1080p30'')</small>
+| 29.976 fps
+| 29.976 progressive fps
+|- valign="TOP"
+| '''50p''' (progressive PAL SD ''576p50'', ''720p50'' and ''1080p50'')
+| 50 fps
+| 50 progressive fps
+|- valign="TOP"
+| '''50i''' (interlaced PAL SD ''576i50'' and ''1080i50'')
+| 50 fps
+| 50 progressive fps
+|- valign="TOP"
+| '''59.94p''' (progressive NTSC SD ''480p59.94'', HD ''720p59.94'' and HD ''1080p59.94'')
+<small>(sometimes mistakenly called ''480p60'', ''720p60'' and ''1080p60'')</small>
+| 59.94 fps
+| 59.94 progressive fps
+|- valign="TOP"
+| '''59.94i''' (interlaced NTSC SD ''480i59.94'', HD ''720i59.94'' and HD ''1080i59.94'')
+<small>(sometimes mistakenly called ''480i60'', ''720i60'' and ''1080i60'')</small>
+| 59.94 fps
+| 59.94 progressive fps
+|}
+
+
+
+
+===Flash Content Output to Screen===
+For [[#Generate_FT_File|Flash content]] played by the [[CasparCG_Server#Flash_Producer|Flash Producer]] and output to an non-[[#Interlacing|interlaced]] [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] such as the [[CasparCG_Server#Screen Consumer|Screen Consumer]]:
+{| border="1" cellpadding="3"
+|- valign="TOP"
+|'''Expected Playback Frame Rate and Mode:'''
+|'''Set the Flash Document Properties Frame Rate:'''
+|'''Render [[#FLV|FLV]]s as:'''
+|- valign="TOP"
+| '''23.976p''' 
+| 23.976 fps
+| 23.976 progressive fps
+|- valign="TOP"
+| '''24p''' (film / movie /cinema for progressive playback)
+| 24 fps
+| 24 progressive fps
+|- valign="TOP"
+| '''25p''' (progressive PAL SD ''576p25'', HD ''720p25'' and HD ''1080p25'')
+| 25 fps
+| 25 progressive fps
+|- valign="TOP"
+| '''29.976p''' (progressive NTSC SD ''480p29.976'', HD ''720p29.976'' and HD ''1080p29.976'')
+<small>(sometimes mistakenly called ''480p30'', ''720p30'' and ''1080p30'')</small>
+| 29.976 fps
+| 29.976 progressive fps
+|- valign="TOP"
+| '''50p''' (progressive PAL SD ''576p50'', ''720p50'' and ''1080p50'')
+| 50 fps
+| 50 progressive fps
+|- valign="TOP"
+| '''59.94p''' (progressive NTSC SD ''480p59.94'', HD ''720p59.94'' and HD ''1080p59.94'')
+<small>(sometimes mistakenly called ''480p60'', ''720p60'' and ''1080p60'')</small>
+| 59.94 fps
+| 59.94 progressive fps
+|}
+
+===Video Content Output to SDI, HDMI or Screen===
+For video content played by the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] and output to an [[CasparCG_Server#Consumers_.28Output_Modules.29|SDI or HDMI consumer]] that is capable of [[#Interlacing|interlaced]] output:
+{| border="1" cellpadding="3"
+|- valign="TOP"
+|'''Expected Playback Frame Rate and Mode:'''
+|'''Render Video as:'''
+|'''Render Video with Field Dominance:'''
+|- valign="TOP"
+| '''23.976p''' 
+| 23.976 fps
+| Progressive
+|- valign="TOP"
+| '''24p''' (film / movie /cinema for progressive playback)
+| 24 fps
+| Progressive
+|- valign="TOP"
+| '''25p''' (progressive PAL SD ''576p25''<!--, HD ''720p25''--> and HD ''1080p25'')
+| 25 fps
+| Progressive
+|- valign="TOP"
+| '''29.976p''' (progressive NTSC SD ''480p29.976'', HD ''720p29.976'' and HD ''1080p29.976'')
+<small>(sometimes mistakenly called ''480p30'', ''720p30'' and ''1080p30'')</small>
+| 29.976 fps
+| Progressive
+|- valign="TOP"
+| '''50p''' (progressive PAL SD ''576p50'', ''720p50'' and ''1080p50'')
+| 50 fps
+| Progressive
+|- valign="TOP"
+| '''50i''' (interlaced PAL SD ''576i50'' and ''1080i50'')
+| 25 fps
+| Interlaced '''upper/odd''' (unless rendering to a [http://en.wikipedia.org/wiki/DV DV] codec, in which case you should render '''lower/even''.')
+|- valign="TOP"
+| '''59.94p''' (progressive NTSC SD ''480p59.94'', HD ''720p59.94'' and HD ''1080p59.94'')
+<small>(sometimes mistakenly called ''480p60'', ''720p60'' and ''1080p60'')</small>
+| 59.94 fps
+| Progressive
+|- valign="TOP"
+| '''59.94i''' (interlaced NTSC SD ''480i59.94'', HD ''720i59.94'' and HD ''1080i59.94'')
+<small>(sometimes mistakenly called ''480i60'', ''720i60'' and ''1080i60'')</small>
+| 29.976 fps
+| Interlaced '''upper/odd''' (unless rendering to a [http://en.wikipedia.org/wiki/DV DV] codec, in which case you should render '''lower/even'''.)
+|}
+
+
+----
+
+=Interlacing=
+
+==Interlaced Content==
+You can have interlaced output of both dynamic Flash content and pre-rendered videos and images to SDI, HD-SDI or HDMI via several available [[CasparCG_Server#Consumers_.28Output_Modules.29|consumers]]. 
+
+==De-interlacing==
+CasparCG Server 2.0 supports [http://avisynth.org.ru/yadif/yadif.html yadif] de-interlacing for the FFmpeg producer and the DeckLink producer. Yadif de-interlacing ''"...checks pixels of previous, current and next frames to re-create the missed field by some local adaptive method (edge-directed interpolation) and uses spatial check to prevent most artifacts"''. 
+
+De-interlacing is automatically enabled when playing clips with incompatible encoding, e.g. 1080i50 -> 1080p50, 720p50 -> 1080i50.
+
+It is possible to manually activate de-interlacing for clips by providing the extra arguments to the LOAD and PLAY commands with a '''FILTER YADIF=1:-1''' command, for example: 
+ LOADBG 1-1 MYCLIP FILTER YADIF=1:-1
+
+=Interlacing=
+
+==Interlaced Content==
+You can have interlaced output of both dynamic Flash content and pre-rendered videos and images to SDI, HD-SDI or HDMI via several available [[CasparCG_Server#Consumers_.28Output_Modules.29|consumers]]. 
+
+==De-interlacing==
+CasparCG Server 2.0 supports [http://avisynth.org.ru/yadif/yadif.html yadif] de-interlacing for the FFmpeg producer and the DeckLink producer. Yadif de-interlacing ''"...checks pixels of previous, current and next frames to re-create the missed field by some local adaptive method (edge-directed interpolation) and uses spatial check to prevent most artifacts"''. 
+
+De-interlacing is automatically enabled when playing clips with incompatible encoding, e.g. 1080i50 -> 1080p50, 720p50 -> 1080i50.
+
+It is possible to manually activate de-interlacing for clips by providing the extra arguments to the LOAD and PLAY commands with a '''FILTER YADIF=1:-1''' command, for example: 
+ LOADBG 1-1 MYCLIP FILTER YADIF=1:-1
+
+=Chroma Subsampling=
+All rendering in all [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] is done at 8-bit [[#Color Depth|color depth]] in RGB [[#Color Levels|color levels]] and with 4:4:4 chroma sampling. Content with lower ''chroma subsampling'' will of course be played "as-is."
+
+Read more about [http://en.wikipedia.org/wiki/Chroma_subsampling Chroma Subsampling] at Wikipedia.
+
+= Pixel-aspect Ratio=
+Read more about [http://en.wikipedia.org/wiki/Pixel_aspect_ratio '''pixel aspect ratio''' at Wikipedia].
+
+=Bit Depth=
+Each [[CasparCG_Server#Producers_.28Input_Modules.29|producer]] and [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] has its own bit depth limitation. If you try to play/render content with a higher bit depth (for example 10-bit DPX, 16-bit TIFF or 32-bit EXR) you will not get predictable or even working results.
+
+Currently we recommend you use 8 bpc (24-bit plus optional 8-bit alpha channel) content for best performance and stable operation.
+
+
+==Producer Bit Depths==
+* The [[CasparCG_Server#Flash_Producer|Flash Producer]] is currently limited to '''8 bits per RGB channel plus an 8 bit alpha/key''', since this is a limitation in Adobe’s FlashPlayer.
+
+* The [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] is limited to '''8 bits per RGB channel plus an 8 bit alpha/key''', since this is a current limitation of the [http://FFmpeg.org/ FFmpeg] library.
+
+* The [[CasparCG_Server#Image_Producer|Image Producer]] is limited to '''8 bits per RGB channel plus an 8 bit alpha/key'''.
+
+* The [[CasparCG_Server#Color_Producer|Color Producer]] is limited to '''8 bits per RGB channel'''.
+
+==Consumer Bit Depths==
+* The [[CasparCG_Server#Bluefish_Consumer|Bluefish Consumer]] currently supports '''8 bits per channel rendering for RGB/fill, plus an 8 bit alpha/key''', even though the Bluefish cards support 10 bit output.
+
+* The [[CasparCG_Server#Screen_Consumer|Screen Consumer]] currently supports 8 bits per channel rendering for RGB/fill and no key/alpha channel.
+
+=Color Levels=
+All rendering in all [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] is done at 8-bit RGB levels, meaning ''R0 B0 G0'' is black and ''R255 G255 B255'' is white.
+
+This makes it easier to work with and preview content on a computer monitor, and facilitates using the same content for both broadcast and web consumption.
+
+To comply with broadcast standards such as [http://en.wikipedia.org/wiki/CCIR_601 CCIR 601] and [http://en.wikipedia.org/wiki/Rec._709 Rec. 709] the 0-255 RGB levels rendered by the [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] is automatically converted to the correct broadcast format (for example a range of 16-235) by the [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] based on the setting in the [[CasparCG_Server#Card_Configuration]].
+
+=Color Space=
+All content must be in '''RGB''' color space. Content in '''CMYK''' color space is '''not''' supported in any current [[CasparCG_Server#Producers_.28Input_Modules.29|producers]].
+
+Conversion from the internal RGB colorspace to output color space is handled by each consumer. For broadcast colorspace YCbCr, Rec 601, Rec 709 and other broadcast colorspaces is handled by the [[CasparCG_Server#SDI_and_HDMI_Cards|supported video output cards]].
+
+==Embedded Color Profiles==
+Currently, no [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] read or use any embedded color space profiles.
+
+=Color Depth=
+==Rendering Bit Depth Limitations==
+Each  [[CasparCG_Server#Producers_.28Input_Modules.29|producer]] and [[CasparCG_Server#Consumers_.28Output_Modules.29|consumer]] has an individual bit depth limitation. If you try to play/render content with a higher bit depth (for example 10-bit DPX, 16-bit TIFF or 32-bit EXR) you will not get predictable or even working results.
+
+===Producer Bit Depths===
+* The [[CasparCG_Server#Flash_Producer|Flash Producer]] is currently limited to '''8 bits per RGB channel plus an 8 bit alpha/key''', since this is a limitation in Adobe’s FlashPlayer.
+
+* The [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] is limited to '''8 bits per RGB channel plus an 8 bit alpha/key''', since this is a current limitation of the [http://FFmpeg.org/ FFmpeg] library.
+
+* The[[CasparCG_Server#Image_Producer]] is limited to '''8 bits per RGB channel plus an 8 bit alpha/key'''.
+
+* The [[CasparCG_Server#Color_Producer|Color Producer]] is limited to '''8 bits per RGB channel'''.
+
+
+
+
+
+=File Names=
+You are advised to keep file names used with all the [[CasparCG_Server#Producers_.28Input_Modules.29|producers]] short, using only standard Latin characters and numerals. Even though most support Unicode characters, there are some limitations in the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] that causes media not to be found if it contains less common characters and even spaces.
+
+'''Recommended:'''
+''Show-Titles_A_03_Upper_Alpha.mov''
+
+'''May cause problems:'''
+''Show Titles A 03 Upper Alpha.mov''
+
+=Channels=
+
+==Fill Channels==
+The '''Fill''' channels is another name for the color channels that make up the image that you actually see when playing a video or image.
+CasparCG Server outputs the standard three color channels '''R'''ed, '''G'''reen and '''B'''lue of content at 8 bits per channel.
+
+==Key / Alpha Channel==
+CasparCG Server 2.0 assumes that all content has pre-multiplied alpha. Version 2.0.4 added support for straight alpha blending in the compositing stage.
+
+CasparCG Server automatically generates a key signal on the the key output of your DeckLink or Bluefish card. If your video files have an embedded alpha channel, that will be used. Everything that cover the stage background in your Flash template graphics (even FLV video or PNG sequences) will become your key signal. When you play both video (one layer) and several Flash layers at once, CasparCG Server handles the compositing and outputs the combined fill and key signals separately. 
+
+Content played by the [[CasparCG_Server#Flash_Producer|Flash Producer]] is always pre-multiplied against black (no matter what the ''Stage background'' color is set to.) When [[CasparCG_Server#Compositing|composited]] on top or between other content (either Flash content in FTs or pre-rendered videos played by the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]], Flash's [[#Flash Document Properties|Stage]] will become transparent and reveal underlying layers.
+The alpha channel in videos played by the FFmpeg Producer should be premultiplied so you can play content from any other producer on top and have everything correctly composited.
+
+The alpha channel in videos played by the [[CasparCG_Server#FFmpeg_Producer|FFmpeg Producer]] should be premultiplied so you can play content from any other producer on top and have everything correctly [[CasparCG_Server#Compositing|composited]].
