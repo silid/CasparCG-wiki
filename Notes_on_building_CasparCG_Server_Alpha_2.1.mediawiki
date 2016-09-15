@@ -1,0 +1,19 @@
+The CasparCG builds site at [http://casparcg.com/builds/CasparCG%20Server/ http://builds.casparcg.com] contains pre-compiled versios of the Caspar CG Server 2.1 source code, if you wish to build it yourself, some notes can be found below, for more detail please search the [http://casparcg.com/forum forums].
+
+
+
+==System Requirements==
+
+* 64bit OS (Windows 7 64bit is preferred)
+* 64bit Flash Player http://aihdownload.adobe.com/bin/live/install_flashplayer11x32ax_mssd_aih.exe
+
+==Setup==
+
+# Download and unzip current version of CasparCG
+# Copy the server folder somewhere
+# Download and unzip current alpha from http://builds.casparcg.com/
+# Copy all files from the alpha over the files in your server folder
+# Delete all cg20.fth... files
+
+
+[[Category:For Developers]]
